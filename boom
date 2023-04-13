@@ -1,0 +1,78 @@
+--chest esp
+local cFolder 
+local rServ = game.RunService
+local con 
+local cam = game.Workspace.Camera
+for i,v in pairs(game.Workspace:GetChildren()) do 
+   if v:IsA("Folder") and v:FindFirstChild("Chest") then 
+       cFolder = v
+       break 
+    end
+end
+local function makeESP(c)
+   local txt = Drawing.new("Text")
+   txt.Visible = false 
+   txt.Center = true 
+   txt.Outline = true 
+   txt.Size = 17  
+   con = rServ.RenderStepped:Connect(function()
+        if c:FindFirstChild("Opened") then 
+           local cOpened = c.Opened 
+           if not cOpened.Value then  
+               if c:FindFirstChild("Bottom") then 
+                  local cBottom = c.Bottom 
+                  local cPos,onscr = cam:WorldToViewportPoint(cBottom.Position)
+                  if onscr then 
+                      txt.Visible = true 
+                      txt.Position = Vector2.new(cPos.X,cPos.Y)
+                      if c:FindFirstChild("Type") then 
+                         local cType = c.Type 
+                         if cType.Value == "Normal" and not cBottom:FindFirstChild("ChestGlow") then 
+                             txt.Text = "Normal Chest"
+                             txt.Color = Color3.fromRGB(255,255,255)
+                         elseif cType.Value == "Gold" then 
+                             txt.Text = "Gold Chest"
+                             txt.Color = Color3.fromRGB(220,188,129) 
+                             txt.Size = 32
+                         end
+                         if c:FindFirstChild("Subtype") then 
+                            txt.Text = "Aurem Chest"
+                            txt.Color = Color3.fromRGB(205,84,75   )   
+                            txt.Size = 32                        
+                        end
+                         if cBottom:FindFirstChild("ChestGlow") then 
+                             txt.Text = "Enchanted Chest"
+                             txt.Color = Color3.fromRGB(196,112,160)   
+                             txt.Size = 32                           
+                          end
+                      end
+                       else 
+                           txt.Visible = false
+                  end
+                  else 
+                      if c:FindFirstChild("Bottom") then 
+                         c.Bottom:Destroy() 
+                         txt:Remove()
+                         if con then 
+                             con:Disconnect()
+                          end
+                      end
+               end
+            else 
+                --if chest doesn't have a bottom part then set txt visibility to false
+                txt.Visible = false
+           end
+        end
+    end)
+end
+for i,v in pairs(cFolder:GetChildren()) do 
+   if v.Name == "Chest" then 
+       makeESP(v) 
+    end
+end
+game.Workspace.DescendantAdded:Connect(function(d)
+    if d.Name == "Chest" then 
+       makeESP(d) 
+    end
+end)
+
